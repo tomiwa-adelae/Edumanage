@@ -29,6 +29,7 @@ import { useRouter } from "next/navigation";
 import { getDashboardPath, useRoleRedirect } from "@/hooks/use-role-redirect";
 import { useSchoolFetcher } from "@/hooks/use-school-fetcher";
 import { TwoFactorVerifyModal } from "@/components/TwoFactorVerifyModal";
+import { setAuthCookie } from "@/lib/utils";
 
 export function LoginForm() {
   const router = useRouter();
@@ -68,6 +69,7 @@ export function LoginForm() {
         }
 
         // Normal login (no 2FA required)
+        if (res?.data?.accessToken) setAuthCookie(res.data.accessToken);
         setUser(res?.data?.user);
         toast.success(res?.data?.message);
         const dashboardPath = getDashboardPath(res?.data?.user?.role);
@@ -79,7 +81,8 @@ export function LoginForm() {
   }
 
   // Handle successful 2FA verification
-  const handleTwoFactorSuccess = (user: any) => {
+  const handleTwoFactorSuccess = (user: any, accessToken?: string) => {
+    if (accessToken) setAuthCookie(accessToken);
     setUser(user);
     setShowTwoFactorModal(false);
     toast.success("Login successful!");

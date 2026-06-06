@@ -21,7 +21,7 @@ interface TwoFactorVerifyModalProps {
   isOpen: boolean;
   userId: string;
   tempToken: string;
-  onSuccess: (user: any) => void;
+  onSuccess: (user: any, accessToken?: string) => void;
   onCancel: () => void;
 }
 
@@ -77,7 +77,7 @@ export function TwoFactorVerifyModal({
 
       const data = await response.json();
       toast.success(data.message || "Login successful!");
-      onSuccess(data.user);
+      onSuccess(data.user, data.accessToken);
 
       // Reset form
       setVerificationCode("");

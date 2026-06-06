@@ -4,6 +4,7 @@ import api from "@/lib/api";
 import { useAuth } from "@/store/useAuth";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { clearAuthCookie } from "@/lib/utils";
 
 export const useSignout = () => {
   const router = useRouter();
@@ -16,6 +17,7 @@ export const useSignout = () => {
     } catch {
       toast.error("Oops! Failed to logout");
     } finally {
+      clearAuthCookie();
       useAuth.getState().clearUser();
       localStorage.removeItem("lastVisitedPath"); // 🔹 clear last page
       router.push("/?logout=true");

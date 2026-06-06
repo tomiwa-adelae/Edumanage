@@ -1,5 +1,6 @@
 import axios, { AxiosError, AxiosInstance } from "axios";
 import { useAuth } from "@/store/useAuth";
+import { clearAuthCookie } from "@/lib/utils";
 
 const api: AxiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_BACKEND_URL,
@@ -76,6 +77,7 @@ api.interceptors.response.use(
         isRefreshing = false;
 
         // Refresh failed — log out user
+        clearAuthCookie();
         const { clearUser } = useAuth.getState();
         clearUser();
         if (typeof window !== "undefined") window.location.assign("/");
@@ -90,6 +92,7 @@ api.interceptors.response.use(
       message === "Unauthorized" ||
       message === "Forbidden"
     ) {
+      clearAuthCookie();
       const { clearUser } = useAuth.getState();
       clearUser();
       if (typeof window !== "undefined") window.location.assign("/");

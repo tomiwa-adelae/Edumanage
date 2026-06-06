@@ -12,6 +12,15 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export function setAuthCookie(token: string) {
+  const isSecure = typeof window !== "undefined" && window.location.protocol === "https:";
+  document.cookie = `accessToken=${token}; path=/; max-age=${24 * 60 * 60}; samesite=strict${isSecure ? "; secure" : ""}`;
+}
+
+export function clearAuthCookie() {
+  document.cookie = "accessToken=; path=/; max-age=0";
+}
+
 export const formatMoneyInput = (inputValue: string | number) => {
   if (inputValue == null) return "";
 
