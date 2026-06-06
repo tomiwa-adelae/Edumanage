@@ -1,0 +1,123 @@
+"use client";
+import { ChevronDownIcon, LogOutIcon } from "lucide-react";
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { DEFAULT_PROFILE_IMAGE } from "@/constant";
+import { useSignout } from "@/hooks/use-signout";
+import { useAuth } from "@/store/useAuth";
+import { formatWord } from "@/lib/utils";
+import { IconUser } from "@tabler/icons-react";
+import Link from "next/link";
+import { getDashboardPath } from "@/hooks/use-role-redirect";
+import { useRouter } from "next/navigation";
+
+export function UserDropdown() {
+  const handleSignout = useSignout();
+  const router = useRouter();
+
+  const { user, setCurrentRole } = useAuth();
+
+  if (!user) return null;
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          className="h-auto p-0 hover:bg-transparent gap-4"
+        >
+          <Avatar>
+            <AvatarImage
+              src={user?.image || DEFAULT_PROFILE_IMAGE}
+              alt={`${user?.firstName}'s picture` || ""}
+            />
+            <AvatarFallback>EMS</AvatarFallback>
+          </Avatar>
+          <div className="text-left hidden md:block">
+            <p className="font-medium text-sm">
+              {user?.title} {user?.firstName} {user?.lastName}
+            </p>
+            <p className="text-xs font-normal text-muted-foreground">
+              {formatWord[user.role]}{" "}
+              {user.role === "STUDENT" &&
+                `- ${
+                  user.Student.Class
+                    ? `${user.Student.Class.level}${user.Student.Class.section}`
+                    : user?.Student.desiredClass || "No class"
+                }`}
+            </p>
+          </div>
+          <ChevronDownIcon
+            size={16}
+            className="opacity-60"
+            aria-hidden="true"
+          />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel className="flex min-w-0 flex-col">
+          <span className="text-foreground truncate text-sm font-medium">
+            {user?.title} {user?.firstName} {user?.lastName}
+          </span>
+          <span className="text-muted-foreground truncate text-xs font-normal">
+            {formatWord[user.role]} - {user.email}
+          </span>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuGroup>
+          {user?.schoolRoles.length > 1 &&
+            user?.schoolRoles.map((role, index) => {
+              const href = getDashboardPath(role.role) || "/dashboard";
+              return (
+                <DropdownMenuItem
+                  key={index}
+                  onClick={() => {
+                    setCurrentRole(role.role);
+                    router.push(href);
+                  }}
+                >
+                  <IconUser
+                    size={16}
+                    className="opacity-60"
+                    aria-hidden="true"
+                  />
+                  <span>Switch to {formatWord[role.role]}</span>
+                </DropdownMenuItem>
+              );
+            })}
+
+          {(user.role === "ADMINISTRATOR" ||
+            user.schoolRoles.some((role) => role.role === "ADMINISTRATOR")) && (
+            <>
+              <DropdownMenuItem asChild>
+                <Link href={`/profile/${user.username}`}>
+                  <IconUser
+                    size={16}
+                    className="opacity-60"
+                    aria-hidden="true"
+                  />
+                  <span>View profile</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+            </>
+          )}
+        </DropdownMenuGroup>
+        <DropdownMenuItem onClick={handleSignout}>
+          <LogOutIcon size={16} className="opacity-60" aria-hidden="true" />
+          <span>Logout</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
