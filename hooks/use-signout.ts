@@ -4,14 +4,16 @@ import api from "@/lib/api";
 import { useAuth } from "@/store/useAuth";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { clearAuthCookie } from "@/lib/utils";
+import { clearAuthCookie, getRefreshToken } from "@/lib/utils";
 
 export const useSignout = () => {
   const router = useRouter();
 
   const handleSignout = async function signout() {
     try {
-      const res = await api.post("/auth/logout");
+      const res = await api.post("/auth/logout", {
+        refreshToken: getRefreshToken(),
+      });
       localStorage.removeItem("currentRole");
       toast.success(res.data.message);
     } catch {

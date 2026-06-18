@@ -12,12 +12,42 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+const ACCESS_TOKEN_KEY = "accessToken";
+const REFRESH_TOKEN_KEY = "refreshToken";
+
+// Persist tokens for Authorization: Bearer auth (works on Safari/iOS where
+// cross-site cookies are blocked). The first-party `accessToken` cookie is kept
+// only so the Next.js middleware can gate protected routes.
+export function setAuthTokens(accessToken?: string, refreshToken?: string) {
+  if (typeof window === "undefined") return;
+  if (accessToken) {
+    localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+    const isSecure = window.location.protocol === "https:";
+    document.cookie = `accessToken=${accessToken}; path=/; max-age=${24 * 60 * 60}; samesite=strict${isSecure ? "; secure" : ""}`;
+  }
+  if (refreshToken) localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+}
+
+export function getAccessToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem(ACCESS_TOKEN_KEY);
+}
+
+export function getRefreshToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem(REFRESH_TOKEN_KEY);
+}
+
+// Backwards-compatible helper used across the auth forms.
 export function setAuthCookie(token: string) {
-  const isSecure = typeof window !== "undefined" && window.location.protocol === "https:";
-  document.cookie = `accessToken=${token}; path=/; max-age=${24 * 60 * 60}; samesite=strict${isSecure ? "; secure" : ""}`;
+  setAuthTokens(token);
 }
 
 export function clearAuthCookie() {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
+  }
   document.cookie = "accessToken=; path=/; max-age=0";
 }
 

@@ -39,7 +39,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { years } from "@/constant";
-import { cn, formatWord, setAuthCookie } from "@/lib/utils";
+import { cn, formatWord, setAuthTokens } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
 import { useRoleRedirect } from "@/hooks/use-role-redirect";
 import { useSchoolFetcher } from "@/hooks/use-school-fetcher";
@@ -178,7 +178,8 @@ export function RegisterForm({
     startTransition(async () => {
       try {
         const res = await api.post("/auth/register/school", data);
-        if (res?.data?.accessToken) setAuthCookie(res.data.accessToken);
+        if (res?.data?.accessToken)
+          setAuthTokens(res.data.accessToken, res.data.refreshToken);
         setUser(res?.data?.user);
         toast.success(res?.data?.message);
         router.push("/a/dashboard");

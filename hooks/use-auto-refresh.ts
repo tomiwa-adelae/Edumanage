@@ -2,6 +2,7 @@
 import { useEffect, useRef } from "react";
 import api from "@/lib/api";
 import { useAuth } from "@/store/useAuth";
+import { getRefreshToken, setAuthTokens } from "@/lib/utils";
 
 const REFRESH_INTERVAL = 14 * 60 * 1000; // 14 minutes
 const TEST_INTERVAL = 50 * 1000; // 50s for testing
@@ -28,12 +29,15 @@ export function useAutoRefresh({ testing = false } = {}) {
 
     const doRefresh = async () => {
       try {
-        // POST refresh endpoint, cookies included by axios config
+        // POST refresh endpoint. Send the stored refresh token (Safari/iOS where
+        // cookies are blocked); cookies are still included for other browsers.
         const res = await api.post(
           "/auth/refresh",
-          {},
+          { refreshToken: getRefreshToken() },
           { withCredentials: true }
         );
+        if (res?.data?.accessToken)
+          setAuthTokens(res.data.accessToken, res.data.refreshToken);
         console.log("🔁 token refreshed via auto-refresh", res?.status);
       } catch (err: any) {
         console.error("❌ refresh failed:", err?.response?.status || err);

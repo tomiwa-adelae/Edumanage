@@ -36,6 +36,7 @@ import {
 import { toast } from "sonner";
 import { TwoFactorSetupModal } from "./TwoFactorSetupModal";
 import { env } from "@/lib/env";
+import { getAccessToken } from "@/lib/utils";
 
 interface TwoFactorSettingsProps {
   userId: string;
@@ -78,6 +79,7 @@ export function TwoFactorSettings({
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${getAccessToken() ?? ""}`,
           },
         }
       );
@@ -114,6 +116,7 @@ export function TwoFactorSettings({
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${getAccessToken() ?? ""}`,
           },
           body: JSON.stringify({ password }),
         }
@@ -146,6 +149,7 @@ export function TwoFactorSettings({
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${getAccessToken() ?? ""}`,
           },
         }
       );
@@ -195,6 +199,7 @@ export function TwoFactorSettings({
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${getAccessToken() ?? ""}`,
         },
       });
 

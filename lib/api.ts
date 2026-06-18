@@ -1,11 +1,28 @@
 import axios, { AxiosError, AxiosInstance } from "axios";
 import { useAuth } from "@/store/useAuth";
-import { clearAuthCookie } from "@/lib/utils";
+import {
+  clearAuthCookie,
+  getAccessToken,
+  getRefreshToken,
+  setAuthTokens,
+} from "@/lib/utils";
 
 const api: AxiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_BACKEND_URL,
   withCredentials: true,
   headers: { "Content-Type": "application/json" },
+});
+
+// Attach the access token as a Bearer header so auth works on Safari/iOS where
+// the cross-site (vercel ↔ render) cookie is blocked by ITP. Cookies are still
+// sent via withCredentials for browsers that allow them.
+api.interceptors.request.use((config) => {
+  const token = getAccessToken();
+  if (token) {
+    config.headers = config.headers ?? {};
+    (config.headers as Record<string, string>).Authorization = `Bearer ${token}`;
+  }
+  return config;
 });
 
 const PUBLIC_ROUTES = [
@@ -59,13 +76,16 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        // Attempt to refresh the access token using the refresh token cookie
-
+        // Refresh using the stored refresh token (Bearer/body) so it works on
+        // Safari/iOS; falls back to the refresh cookie on other browsers.
         const { data } = await api.post(
           "/auth/refresh",
-          {},
+          { refreshToken: getRefreshToken() },
           { withCredentials: true }
         );
+
+        // Persist the rotated tokens for subsequent requests.
+        if (data?.accessToken) setAuthTokens(data.accessToken, data.refreshToken);
 
         // Refresh succeeded — retry queued requests
         processQueue(null);

@@ -17,6 +17,7 @@ import { Loader2, Copy, CheckCircle2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
 import { env } from "@/lib/env";
+import { getAccessToken } from "@/lib/utils";
 
 interface TwoFactorSetupModalProps {
   isOpen: boolean;
@@ -51,6 +52,7 @@ export function TwoFactorSetupModal({
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${getAccessToken() ?? ""}`,
           },
         }
       );
@@ -88,6 +90,7 @@ export function TwoFactorSetupModal({
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${getAccessToken() ?? ""}`,
           },
           body: JSON.stringify({
             secret,

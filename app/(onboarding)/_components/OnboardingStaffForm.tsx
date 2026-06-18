@@ -38,7 +38,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { genders, years } from "@/constant";
-import { cn, formatWord } from "@/lib/utils";
+import { cn, formatWord, setAuthTokens } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
 import {
   OnboardingStaffSchema,
@@ -180,6 +180,7 @@ export function OnboardingStaffForm({
           `/schools/${schoolID}/staff/onboarding`,
           data
         );
+        setAuthTokens(res?.data?.accessToken, res?.data?.refreshToken);
         setUser(res?.data?.user);
         toast.success(res?.data?.message);
         const dashboardPath = getDashboardPath(res?.data?.user?.role);

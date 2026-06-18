@@ -37,7 +37,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { genders, relationships, years } from "@/constant";
-import { cn, formatWord } from "@/lib/utils";
+import { cn, formatWord, setAuthTokens } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
 import {
   OnboardingStudentSchema,
@@ -189,6 +189,7 @@ export function OnboardingStudentForm({
     startTransition(async () => {
       try {
         const res = await api.post(`/students/${schoolID}/onboarding`, data);
+        setAuthTokens(res?.data?.accessToken, res?.data?.refreshToken);
         setUser(res?.data?.user);
         toast.success(res?.data?.message);
         router.replace("/s/dashboard");
